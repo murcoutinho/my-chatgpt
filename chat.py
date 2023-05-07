@@ -9,6 +9,7 @@ import os
 
 #To setup api key, follow this guide: https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
 openai.api_key = os.environ["OPENAI_API_KEY"]
+stop_recording_event = threading.Event()
 
 def chat(question):
     accumulated_response = ""
@@ -28,7 +29,7 @@ def chat(question):
             emit('response', {'response_text': accumulated_response}, namespace='/chat')
 
 
-def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=10):
+def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=10, stop_recording_event=None):
     audio = pyaudio.PyAudio()
 
     stream = audio.open(format=format,
@@ -53,12 +54,12 @@ def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pya
 
     space_key_thread = threading.Thread(target=listener.start)  # Start the listener thread
     space_key_thread.start()
-
+    
     while recording:
         elapsed_time = time.time() - start_time
-        if elapsed_time >= max_duration:
+        if elapsed_time >= max_duration or (stop_recording_event and stop_recording_event.is_set()):
             recording = False
-            listener.stop()  # Stop the listener when the maximum duration is reached
+            listener.stop()  # Stop the listener when the maximum duration is reached or stop_recording_event is set
             break
         data = stream.read(chunk)
         frames.append(data)
@@ -76,7 +77,8 @@ def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pya
         wave_file.writeframes(b''.join(frames))
 
 def chat_with_audio():
-    record_audio("output.wav")
+    stop_recording_event = threading.Event()
+    record_audio("output.wav", stop_recording_event=stop_recording_event)
     
     with open("output.wav", "rb") as audio_file:
         transcript = openai.Audio.transcribe("whisper-1", audio_file)

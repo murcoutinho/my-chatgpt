@@ -73,7 +73,7 @@
 
       // New button
       var audioButton = document.createElement("button");
-      audioButton.innerHTML = "Ask with audio";
+      audioButton.innerHTML = "Ask with audio: start";
       audioButton.addEventListener("click", function() {
         this.blur();
         $.getJSON('/transcribe_audio', function(data) {
@@ -83,6 +83,23 @@
           });
         });
       });
+
+      var stopButton = document.createElement("button");
+      stopButton.innerHTML = "Stop recording";
+      stopButton.addEventListener("click", function() {
+        this.blur();
+        $.ajax({
+          url: "/stop_recording",
+          type: "GET",
+          success: function() {
+            console.log("Stop button clicked and recording stopped");
+          },
+          error: function() {
+            console.log("Error stopping recording");
+          },
+        });
+      });
+
       
       var submittedText = document.createElement("textarea");
       submittedText.setAttribute("id", "gpt_answer_text"+counter);
@@ -100,6 +117,7 @@
       
       container.appendChild(questionInput);
       container.appendChild(audioButton); 
+      container.appendChild(stopButton);
       container.appendChild(document.createElement("br"));
       
       var answerTitle = document.createElement("h2");

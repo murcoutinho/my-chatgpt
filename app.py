@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify
 from flask_socketio import SocketIO
-from chat import chat, chat_with_audio
+from chat import chat, chat_with_audio, stop_recording_event
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -22,6 +22,11 @@ def transcribe_audio():
 def handle_submit_question(data):
     question = data['question']
     chat(question)
+
+@app.route('/stop_recording', methods=['GET'])
+def stop_recording():
+    stop_recording_event.set()
+    return jsonify(status="success")
 
 if __name__ == '__main__':
     socketio.run(app)
