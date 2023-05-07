@@ -78,6 +78,7 @@
         this.blur();
         $.getJSON('/transcribe_audio', function(data) {
           var transcript_text = data.transcript_text;
+          $(input_id).val(transcript_text);
           socket.emit('submit_question', {question: transcript_text}, function(response) {
             createNewTextareas();
           });
