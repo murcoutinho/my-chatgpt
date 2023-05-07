@@ -27,6 +27,12 @@
       align-items: center;
     }
     
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px; /* Adjust this value to change the space between buttons */
+    }
+    
     h2 {
       text-align: center;
       width: 100%;
@@ -52,59 +58,56 @@
     });
     function createNewTextareas() {
       counter = counter + 1;
-      input_id = '#question_input'+counter;
-      gpt_answer_id = '#gpt_answer_text'+counter;
+      input_id = '#question_input' + counter;
+      gpt_answer_id = '#gpt_answer_text' + counter;
       
       var questionInput = document.createElement("textarea");
-      questionInput.setAttribute("name", "question_input"+counter);
-      questionInput.setAttribute("id", "question_input"+counter);
+      questionInput.setAttribute("name", "question_input" + counter);
+      questionInput.setAttribute("id", "question_input" + counter);
       questionInput.setAttribute("rows", "8");
       questionInput.setAttribute("cols", "80");
-      questionInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
+      questionInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
           var question = $(input_id).val();
-          socket.emit('submit_question', {question: question}, function(response) {
-            // This callback function will be executed when the server responds
+          socket.emit("submit_question", { question: question }, function (response) {
             createNewTextareas();
           });
         }
       });
-
-      // New button
+      
       var audioButton = document.createElement("button");
       audioButton.innerHTML = "Ask with audio: start";
-      audioButton.addEventListener("click", function() {
+      audioButton.addEventListener("click", function () {
         this.blur();
-        $.getJSON('/transcribe_audio', function(data) {
+        $.getJSON("/transcribe_audio", function (data) {
           var transcript_text = data.transcript_text;
           $(input_id).val(transcript_text);
-          socket.emit('submit_question', {question: transcript_text}, function(response) {
+          socket.emit("submit_question", { question: transcript_text }, function (response) {
             createNewTextareas();
           });
         });
       });
-
+      
       var stopButton = document.createElement("button");
       stopButton.innerHTML = "Stop recording";
-      stopButton.addEventListener("click", function() {
+      stopButton.addEventListener("click", function () {
         this.blur();
         $.ajax({
           url: "/stop_recording",
           type: "GET",
-          success: function() {
+          success: function () {
             console.log("Stop button clicked and recording stopped");
           },
-          error: function() {
+          error: function () {
             console.log("Error stopping recording");
           },
         });
       });
-
       
       var submittedText = document.createElement("textarea");
-      submittedText.setAttribute("id", "gpt_answer_text"+counter);
-      submittedText.setAttribute("rows", "8");
+      submittedText.setAttribute("id", "gpt_answer_text" + counter);
+      submittedText.setAttribute("rows", "20");
       submittedText.setAttribute("cols", "80");
       submittedText.setAttribute("readonly", true);
       submittedText.style.resize = "none";
@@ -117,8 +120,18 @@
       container.appendChild(questionTitle);
       
       container.appendChild(questionInput);
-      container.appendChild(audioButton); 
-      container.appendChild(stopButton);
+      
+      // Create a new div for the buttons
+      var buttonContainer = document.createElement("div");
+      buttonContainer.classList.add("button-container");
+      
+      // Add the buttons to the buttonContainer
+      buttonContainer.appendChild(audioButton);
+      buttonContainer.appendChild(stopButton);
+      
+      // Add the buttonContainer to the container div
+      container.appendChild(buttonContainer);
+      
       container.appendChild(document.createElement("br"));
       
       var answerTitle = document.createElement("h2");
@@ -129,9 +142,10 @@
       container.appendChild(document.createElement("br"));
       
       document.body.appendChild(container);
-
-      questionInput.focus(); 
+      
+      questionInput.focus();
     }
+    
     
     function autoResize(textarea) {
       textarea.style.height = 'auto';
