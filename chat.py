@@ -2,7 +2,6 @@ from flask_socketio import emit
 import openai
 import pyaudio
 import wave
-from pynput import keyboard
 import threading
 import time
 import os
@@ -29,7 +28,7 @@ def chat(question):
             emit('response', {'response_text': accumulated_response}, namespace='/chat')
 
 
-def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=10, stop_recording_event=None):
+def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=100, stop_recording_event=None):
     audio = pyaudio.PyAudio()
 
     stream = audio.open(format=format,
@@ -41,30 +40,14 @@ def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pya
     frames = []
     recording = True
     start_time = time.time()
-
-    listener = keyboard.Listener(on_press=None)  # Initialize the listener outside the function
-
-    def on_press(key):
-        nonlocal recording, listener
-        if key == keyboard.Key.space:
-            recording = False
-            listener.stop()  # Stop the listener when the space key is pressed
-
-    listener.on_press = on_press  # Assign the on_press function
-
-    space_key_thread = threading.Thread(target=listener.start)  # Start the listener thread
-    space_key_thread.start()
     
     while recording:
         elapsed_time = time.time() - start_time
         if elapsed_time >= max_duration or (stop_recording_event and stop_recording_event.is_set()):
             recording = False
-            listener.stop()  # Stop the listener when the maximum duration is reached or stop_recording_event is set
             break
         data = stream.read(chunk)
         frames.append(data)
-
-    space_key_thread.join()  # Wait for the space_key_thread to finish
 
     stream.stop_stream()
     stream.close()
@@ -77,7 +60,8 @@ def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pya
         wave_file.writeframes(b''.join(frames))
 
 def chat_with_audio():
-    stop_recording_event = threading.Event()
+    global stop_recording_event  # Make sure you use the global stop_recording_event
+    stop_recording_event.clear() # Clear the event before starting a new recording
     record_audio("output.wav", stop_recording_event=stop_recording_event)
     
     with open("output.wav", "rb") as audio_file:
