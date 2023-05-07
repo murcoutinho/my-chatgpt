@@ -18,7 +18,7 @@ def chat(question):
                 {"role": "system", "content": "You are a useful assistant."},
                 {"role": "user", "content": question},
             ],
-        max_tokens=120,
+        max_tokens=2048,
         temperature=0.5,
         stream=True
     ):
