@@ -1,0 +1,7 @@
+output.wav
+meaning_of_life.py
+mind_simulator.py
+querier.py
+*.pyc
+__pycache__
+.DS_Store

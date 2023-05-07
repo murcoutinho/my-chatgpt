@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <title>Input field example</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+  <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    h2 {
+      text-align: center;
+      width: 100%;
+      font-size: 18px;
+    }
+  </style>
+  <script type="text/javascript">
+    var input_id;
+    var gpt_answer_id;
+    var counter = 0;
+    var socket = io.connect('/chat');
+    socket.on('connect', function() {
+      console.log('Connected');
+    });
+    
+    socket.on('response', function(data) {
+      $(gpt_answer_id).val(data.response_text);
+      autoResize($(gpt_answer_id)[0]);
+    });
+    
+    $(document).ready(function() {
+      createNewTextareas();
+    });
+    function createNewTextareas() {
+      counter = counter + 1;
+      input_id = '#question_input'+counter;
+      gpt_answer_id = '#gpt_answer_text'+counter;
+      
+      var questionInput = document.createElement("textarea");
+      questionInput.setAttribute("name", "question_input"+counter);
+      questionInput.setAttribute("id", "question_input"+counter);
+      questionInput.setAttribute("rows", "8");
+      questionInput.setAttribute("cols", "80");
+      questionInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          var question = $(input_id).val();
+          socket.emit('submit_question', {question: question}, function(response) {
+            // This callback function will be executed when the server responds
+            createNewTextareas();
+          });
+        }
+      });
+
+      // New button
+      var audioButton = document.createElement("button");
+      audioButton.innerHTML = "Ask with audio";
+      audioButton.addEventListener("click", function() {
+        this.blur();
+        $.getJSON('/transcribe_audio', function(data) {
+          var transcript_text = data.transcript_text;
+          socket.emit('submit_question', {question: transcript_text}, function(response) {
+            createNewTextareas();
+          });
+        });
+      });
+      
+      var submittedText = document.createElement("textarea");
+      submittedText.setAttribute("id", "gpt_answer_text"+counter);
+      submittedText.setAttribute("rows", "8");
+      submittedText.setAttribute("cols", "80");
+      submittedText.setAttribute("readonly", true);
+      submittedText.style.resize = "none";
+      
+      var container = document.createElement("div");
+      container.classList.add("container");
+      
+      var questionTitle = document.createElement("h2");
+      questionTitle.appendChild(document.createTextNode("Type your question:"));
+      container.appendChild(questionTitle);
+      
+      container.appendChild(questionInput);
+      container.appendChild(audioButton); 
+      container.appendChild(document.createElement("br"));
+      
+      var answerTitle = document.createElement("h2");
+      answerTitle.appendChild(document.createTextNode("Answer:"));
+      container.appendChild(answerTitle);
+      
+      container.appendChild(submittedText);
+      container.appendChild(document.createElement("br"));
+      
+      document.body.appendChild(container);
+
+      questionInput.focus(); 
+    }
+    
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+  </script>
+</head>
+</html>
