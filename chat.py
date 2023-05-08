@@ -22,7 +22,7 @@ def chat(question, model = "gpt-3.5-turbo"):
     number_of_previous_messages_as_context = 1
 
     messages = [{"role": "system", "content": system_message}] + [{"role": "user", "content": message} for message in last_queries[-number_of_previous_messages_as_context:]] + [{"role": "user", "content": question}]
-    print(messages)
+    print(model)
     for resp in openai.ChatCompletion.create(model=model,messages=messages,max_tokens=2048,stream=True):
         if "content" in resp["choices"][0]["delta"]:
             accumulated_response += resp["choices"][0]["delta"]["content"]

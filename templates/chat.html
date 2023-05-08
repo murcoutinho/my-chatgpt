@@ -88,14 +88,15 @@
   <div class="dropdown">
     <button class="dropdown-button">Select a model: ▼</button>
     <div class="dropdown-content">
-      <a href="#">GPT-3.5</a>
-      <a href="#">GPT-4</a>
+      <a href="#" data-model="gpt-3.5-turbo">GPT-3.5</a>
+      <a href="#" data-model="gpt-4">GPT-4</a>
     </div>
   </div>
   <script type="text/javascript">
     var input_id;
     var gpt_answer_id;
     var counter = 0;
+    var selectedModel = "gpt-3.5-turbo"; // Default selected model
     var socket = io.connect('/chat');
     socket.on('connect', function() {
       console.log('Connected');
@@ -109,6 +110,13 @@
     $(document).ready(function() {
       createNewTextareas();
     });
+    
+    $(".dropdown-content a").on("click", function (event) {
+      event.preventDefault();
+      selectedModel = $(this).data("model");
+      $(".dropdown-button").text("Select a model: " + selectedModel + " ▼");
+    });
+    
     function createNewTextareas() {
       counter = counter + 1;
       input_id = '#question_input' + counter;
@@ -123,7 +131,7 @@
         if (event.key === "Enter" && !event.shiftKey) {
           event.preventDefault();
           var question = $(input_id).val();
-          socket.emit("submit_question", { question: question }, function (response) {
+          socket.emit("submit_question", { question: question, model: selectedModel}, function (response) {
             createNewTextareas();
           });
         }

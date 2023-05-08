@@ -21,7 +21,8 @@ def transcribe_audio():
 @socketio.on('submit_question', namespace='/chat')
 def handle_submit_question(data):
     question = data['question']
-    chat(question)
+    model = data.get('model', 'gpt-3.5-turbo')  # Default model if not provided
+    chat(question, model)  # Pass the model parameter to the chat function
 
 @app.route('/stop_recording', methods=['GET'])
 def stop_recording():
