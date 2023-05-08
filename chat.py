@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_socketio import emit
 import openai
 import pyaudio
@@ -15,6 +16,7 @@ last_queries = [""]
 
 def chat(question, model = "gpt-3.5-turbo"):
     global last_queries 
+    log_file = "history.log"
     accumulated_response = ""
     system_message = "You are a helpful assistant."
     number_of_previous_messages_as_context = 1
@@ -25,10 +27,17 @@ def chat(question, model = "gpt-3.5-turbo"):
         if "content" in resp["choices"][0]["delta"]:
             accumulated_response += resp["choices"][0]["delta"]["content"]
             emit('response', {'response_text': accumulated_response}, namespace='/chat')
-    last_queries.append(json.dumps({
+    last_query_json = {
         "question": question,
         "response": accumulated_response
-    }))
+    }
+    last_queries.append(json.dumps(last_query_json))
+    
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    last_query_json["date"] = timestamp
+    with open(log_file, "a") as f:
+        f.write(json.dumps(last_query_json) + "\n")
 
 def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=100, stop_recording_event=None):
     audio = pyaudio.PyAudio()
