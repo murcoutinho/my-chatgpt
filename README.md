@@ -53,7 +53,7 @@ pip3 install -r requirements.txt
 1. Run the Flask application:
 
 ```
-python app.py
+python3 app.py
 ```
 
 2. Open a web browser and navigate to `http://localhost:5000`.
