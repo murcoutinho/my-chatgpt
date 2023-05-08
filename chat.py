@@ -5,28 +5,30 @@ import wave
 import threading
 import time
 import os
+import json
 
 #To setup api key, follow this guide: https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
 openai.api_key = os.environ["OPENAI_API_KEY"]
 stop_recording_event = threading.Event()
 
-def chat(question):
-    accumulated_response = ""
-    for resp in openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-                {"role": "system", "content": "You are a useful assistant."},
-                {"role": "user", "content": question},
-            ],
-        max_tokens=2048,
-        temperature=0.5,
-        stream=True
-    ):
+last_queries = [""]
 
+def chat(question, model = "gpt-3.5-turbo"):
+    global last_queries 
+    accumulated_response = ""
+    system_message = "You are a helpful assistant."
+    number_of_previous_messages_as_context = 1
+
+    messages = [{"role": "system", "content": system_message}] + [{"role": "user", "content": message} for message in last_queries[-number_of_previous_messages_as_context:]] + [{"role": "user", "content": question}]
+    print(messages)
+    for resp in openai.ChatCompletion.create(model=model,messages=messages,max_tokens=2048,stream=True):
         if "content" in resp["choices"][0]["delta"]:
             accumulated_response += resp["choices"][0]["delta"]["content"]
             emit('response', {'response_text': accumulated_response}, namespace='/chat')
-
+    last_queries.append(json.dumps({
+        "question": question,
+        "response": accumulated_response
+    }))
 
 def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pyaudio.paInt16, max_duration=100, stop_recording_event=None):
     audio = pyaudio.PyAudio()
@@ -60,7 +62,7 @@ def record_audio(output_filename, channels=1, rate=44100, chunk=1024, format=pya
         wave_file.writeframes(b''.join(frames))
 
 def chat_with_audio():
-    global stop_recording_event  # Make sure you use the global stop_recording_event
+    global stop_recording_event  # use the global stop_recording_event
     stop_recording_event.clear() # Clear the event before starting a new recording
     record_audio("output.wav", stop_recording_event=stop_recording_event)
     
