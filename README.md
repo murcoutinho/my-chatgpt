@@ -45,7 +45,7 @@ or
 pip3 install -r requirements.txt
 ```
 
-4. Set your OpenAI API key as environment variables. To securely set up the API key, follow the guide on [best practices for API key safety](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety):
+4. Set your OpenAI API key as environment variables. To securely set up the API key, follow the guide on [best practices for API key safety](https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety).
 
 
 ## Usage
