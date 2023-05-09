@@ -4,9 +4,12 @@
 
 My-ChatGPT is a web-based ChatGPT application that enables users to interact with OpenAI's GPT models (e.g., GPT-3.5-turbo and GPT-4) through a user-friendly interface. This powerful solution allows you to access the advanced features of GPT-4 on demand using an API key, without needing to pay for a $20 subscription. Users can type or use their voice to ask questions, and the application will respond with the generated answer. The app saves all previous conversations in your computer so that you can easily access or export it to other solutions.
 
+Additionally, this project implements the SmartGPT model ([see this video](https://www.youtube.com/watch?v=wVzuvf9D9BU&t=866s)), which is capable of improve answers given by chatgpt by automatically using multiple clever prompts and techniques like reflection.
+
 ## Features
 
 - Interact with OpenAI's GPT models (GPT-3.5-turbo and GPT-4) through a simple web interface.
+- Use SmartGPT design with GPT-3.5-turbo or GPT-4.
 - Access GPT-4 on demand using an API key, without paying for a subscription.
 - Type or use your voice to ask questions.
 - Automatic logging of previous conversations.
@@ -58,7 +61,7 @@ python3 app.py
 
 2. Open a web browser and navigate to `http://localhost:5000`.
 
-3. Choose a GPT model from the dropdown menu.
+3. Choose a GPT model from the dropdown menu. Keep in mind that SmartGPT queries the API multiple times, thus it will be more expensive and slower to answer.
 
 4. Type or use your voice to ask questions. Click the "Ask with audio: start" button to start recording your voice, and click the "Stop recording" button to stop recording and transcribe your question.
 
