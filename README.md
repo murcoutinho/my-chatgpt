@@ -16,6 +16,8 @@ Additionally, this project implements the SmartGPT model ([see this video](https
 - Audio recording and transcribing functionality using the OpenAI Whisper API.
 - Responsive textareas that resize automatically based on content.
 
+![image](https://user-images.githubusercontent.com/13295110/236978747-683554c5-f858-4b89-86b1-28bbf9c9899d.png)
+
 ## Prerequisites
 
 To set up and run the ChatGPT Web App, you need the following:
